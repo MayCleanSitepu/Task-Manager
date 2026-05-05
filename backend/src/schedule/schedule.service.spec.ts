@@ -37,7 +37,7 @@ describe('ScheduleService', () => {
 
       mockTaskRepository.findByDateRange.mockResolvedValue(fakeTasks);
       const result = await scheduleService.getSchedule(
-        userId,
+        { sub: userId, role: 'MEMBER' },
         new Date(startDate),
         new Date(endDate),
       );
