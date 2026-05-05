@@ -11,20 +11,29 @@ export class TasksService {
   constructor(
     private repository: TaskRepository,
     private prisma: PrismaService,
-    private notificationGateway: NotificationGateway
-  ){}
+    private notificationGateway: NotificationGateway,
+  ) {}
 
-  async create(dto: CreateTaskDto, user: { sub: string, role: string }) {
-    const project = await this.prisma.project.findUnique({ where: { id: dto.projectId } });
+  async create(dto: CreateTaskDto, user: { sub: string; role: string }) {
+    const project = await this.prisma.project.findUnique({
+      where: { id: dto.projectId },
+    });
     if (!project) throw new NotFoundException('Project not found');
-    
+
     if (user.role !== 'ADMIN' && project.ownerId !== user.sub) {
       throw new NotFoundException('Access denied to this project');
     }
 
     const data: Prisma.TaskUncheckedCreateInput = {
-      ...dto,
-      scheduledStart: dto.scheduledStart ? new Date(dto.scheduledStart) : undefined,
+      title: dto.title,
+      description: dto.description,
+      priority: dto.priority,
+      status: dto.status,
+      projectId: dto.projectId,
+      assigneeId: dto.assigneeId,
+      scheduledStart: dto.scheduledStart
+        ? new Date(dto.scheduledStart)
+        : undefined,
       scheduledEnd: dto.scheduledEnd ? new Date(dto.scheduledEnd) : undefined,
     };
     return this.repository.create(data);
@@ -34,41 +43,55 @@ export class TasksService {
     return this.repository.findByProject(projectId);
   }
 
-  async findOne(id: string, user: { sub: string, role: string }) {
+  async findOne(id: string, user: { sub: string; role: string }) {
     const task = await this.repository.findById(id);
     if (!task) throw new NotFoundException('Task not found');
-    
+
     if (user.role !== 'ADMIN' && task.project.ownerId !== user.sub) {
       throw new NotFoundException('Task not found or access denied');
     }
-    
+
     return task;
   }
 
-  async update(id: string, dto: UpdateTaskDto, user: { sub: string, role: string }) {
-    const currentTask = await this.findOne(id, user); 
+  async update(
+    id: string,
+    dto: UpdateTaskDto,
+    user: { sub: string; role: string },
+  ) {
+    const currentTask = await this.findOne(id, user);
 
-    const data = {
-      ...dto,
-      scheduledStart: dto.scheduledStart ? new Date(dto.scheduledStart) : undefined,
+    const data: Prisma.TaskUncheckedUpdateInput = {
+      title: dto.title,
+      description: dto.description,
+      priority: dto.priority,
+      status: dto.status,
+      assigneeId: dto.assigneeId,
+      scheduledStart: dto.scheduledStart
+        ? new Date(dto.scheduledStart)
+        : undefined,
       scheduledEnd: dto.scheduledEnd ? new Date(dto.scheduledEnd) : undefined,
     };
 
     const updatedTask = await this.repository.update(id, data);
 
     if (dto.assigneeId && dto.assigneeId !== currentTask.assigneeId) {
-      this.notificationGateway.sendNotification(dto.assigneeId, 'task_assigned', {
-        taskId: id,
-        title: updatedTask.title,
-        message: `You have been assigned to task: ${updatedTask.title}`
-      });
+      this.notificationGateway.sendNotification(
+        dto.assigneeId,
+        'task_assigned',
+        {
+          taskId: id,
+          title: updatedTask.title,
+          message: `You have been assigned to task: ${updatedTask.title}`,
+        },
+      );
     }
 
     return updatedTask;
   }
 
-  async remove(id: string, user: { sub: string, role: string }) {
-    await this.findOne(id, user); 
+  async remove(id: string, user: { sub: string; role: string }) {
+    await this.findOne(id, user);
     return this.repository.delete(id);
   }
 }

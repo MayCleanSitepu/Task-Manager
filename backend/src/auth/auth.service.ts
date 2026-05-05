@@ -1,4 +1,8 @@
-import { Injectable, ConflictException, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  ConflictException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { RegisterDto } from './dto/register.dto';
 import * as bcrypt from 'bcrypt';
@@ -9,12 +13,11 @@ import { LoginDto } from './dto/login.dto';
 @Injectable()
 export class AuthService {
   constructor(
-    private repository: AuthRepository, 
-    private jwtService: JwtService
+    private repository: AuthRepository,
+    private jwtService: JwtService,
   ) {}
 
   async register(dto: RegisterDto) {
-
     const userExists = await this.repository.findByEmail(dto.email);
     if (userExists) throw new ConflictException('Email already used');
 
@@ -26,13 +29,16 @@ export class AuthService {
       password: hashedPassword,
     });
 
-    const { password, ...result } = user;
+    const result = {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+    };
     return result;
-
   }
 
-    async login(dto: LoginDto) {
-
+  async login(dto: LoginDto): Promise<{ access_token: string; user: any }> {
     const user = await this.repository.findByEmail(dto.email);
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
@@ -44,7 +50,7 @@ export class AuthService {
     }
 
     const payload = { sub: user.id, email: user.email, role: user.role };
-    
+
     return {
       access_token: await this.jwtService.signAsync(payload),
       user: {
@@ -52,7 +58,7 @@ export class AuthService {
         name: user.name,
         email: user.email,
         role: user.role,
-      }
+      },
     };
   }
 

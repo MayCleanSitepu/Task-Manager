@@ -8,5 +8,4 @@ export class CreateProjectDto {
   @IsString()
   @IsNotEmpty({ message: 'Description are required' })
   description: string;
-
 }

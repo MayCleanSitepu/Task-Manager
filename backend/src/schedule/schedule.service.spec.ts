@@ -36,20 +36,37 @@ describe('ScheduleService', () => {
       ];
 
       mockTaskRepository.findByDateRange.mockResolvedValue(fakeTasks);
-      const result = await scheduleService.getSchedule(userId, new Date(startDate), new Date(endDate));
+      const result = await scheduleService.getSchedule(
+        userId,
+        new Date(startDate),
+        new Date(endDate),
+      );
 
-      expect(mockTaskRepository.findByDateRange).toHaveBeenCalledWith(userId, new Date(startDate), new Date(endDate));
+      expect(mockTaskRepository.findByDateRange).toHaveBeenCalledWith(
+        userId,
+        new Date(startDate),
+        new Date(endDate),
+      );
       expect(result).toEqual(fakeTasks);
     });
   });
 
   describe('getConflict()', () => {
     it('(+)no conflict', async () => {
-
       const userId = 'u-1';
       const fakeTasks = [
-        { id: 't-1', title: 'Morning Task', scheduledStart: new Date('2026-05-10T08:00:00Z'), scheduledEnd: new Date('2026-05-10T10:00:00Z') },
-        { id: 't-2', title: 'Afternoon Task', scheduledStart: new Date('2026-05-10T13:00:00Z'), scheduledEnd: new Date('2026-05-10T15:00:00Z') },
+        {
+          id: 't-1',
+          title: 'Morning Task',
+          scheduledStart: new Date('2026-05-10T08:00:00Z'),
+          scheduledEnd: new Date('2026-05-10T10:00:00Z'),
+        },
+        {
+          id: 't-2',
+          title: 'Afternoon Task',
+          scheduledStart: new Date('2026-05-10T13:00:00Z'),
+          scheduledEnd: new Date('2026-05-10T15:00:00Z'),
+        },
       ];
 
       mockTaskRepository.findAllByAssignee.mockResolvedValue(fakeTasks);
@@ -61,15 +78,27 @@ describe('ScheduleService', () => {
     it('(-)conflict', async () => {
       const userId = 'u-1';
       const fakeTasks = [
-        { id: 't-1', title: 'Task 1', scheduledStart: new Date('2026-05-10T10:00:00Z'), scheduledEnd: new Date('2026-05-10T12:00:00Z') },
-        { id: 't-2', title: 'Task 2', scheduledStart: new Date('2026-05-10T11:00:00Z'), scheduledEnd: new Date('2026-05-10T13:00:00Z') },
+        {
+          id: 't-1',
+          title: 'Task 1',
+          scheduledStart: new Date('2026-05-10T10:00:00Z'),
+          scheduledEnd: new Date('2026-05-10T12:00:00Z'),
+        },
+        {
+          id: 't-2',
+          title: 'Task 2',
+          scheduledStart: new Date('2026-05-10T11:00:00Z'),
+          scheduledEnd: new Date('2026-05-10T13:00:00Z'),
+        },
       ];
 
       mockTaskRepository.findAllByAssignee.mockResolvedValue(fakeTasks);
       const result = await scheduleService.getConflict(userId);
 
       expect(result.length).toBe(1);
-      expect(result[0].message).toContain('conflict schedule between "Task 1" and "Task 2"');
+      expect(result[0].message).toContain(
+        'conflict schedule between "Task 1" and "Task 2"',
+      );
     });
   });
 });

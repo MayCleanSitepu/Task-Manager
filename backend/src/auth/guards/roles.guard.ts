@@ -12,16 +12,16 @@ export class RolesGuard implements CanActivate {
       context.getHandler(),
       context.getClass(),
     ]);
-    
+
     if (!requiredRoles) {
       return true;
     }
-    
+
     const { user } = context.switchToHttp().getRequest();
-    // Admin can access everything regardless of required roles if we want, 
+    // Admin can access everything regardless of required roles if we want,
     // but better to follow required roles explicitly or add Admin check here.
     if (user?.role === Role.ADMIN) return true;
-    
+
     return requiredRoles.some((role) => user?.role === role);
   }
 }

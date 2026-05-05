@@ -20,7 +20,7 @@ describe('Eterna API (e2e)', () => {
 
     app = moduleFixture.createNestApplication();
     app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
-  
+
     await app.init();
   });
 
@@ -41,7 +41,7 @@ describe('Eterna API (e2e)', () => {
         .post('/auth/register')
         .send(testUser)
         .expect(201);
-        
+
       expect(response.body).toHaveProperty('id');
       expect(response.body.email).toBe(testUser.email);
     });
@@ -51,7 +51,7 @@ describe('Eterna API (e2e)', () => {
         .post('/auth/login')
         .send({ email: testUser.email, password: testUser.password })
         .expect(201);
-        
+
       expect(response.body).toHaveProperty('access_token');
       jwtToken = response.body.access_token;
     });
@@ -65,8 +65,8 @@ describe('Eterna API (e2e)', () => {
       expect(response.body.message).toEqual(
         expect.arrayContaining([
           expect.stringContaining('email must be an email'),
-          expect.stringContaining('Password at least contain 6 characters')
-        ])
+          expect.stringContaining('Password at least contain 6 characters'),
+        ]),
       );
     });
   });
@@ -75,18 +75,15 @@ describe('Eterna API (e2e)', () => {
     let projectId = '';
     let testUserId = '';
 
- 
     beforeAll(async () => {
-        const response = await request(app.getHttpServer())
-          .post('/auth/login')
-          .send({ email: testUser.email, password: testUser.password });
-        testUserId = response.body.user.id;
+      const response = await request(app.getHttpServer())
+        .post('/auth/login')
+        .send({ email: testUser.email, password: testUser.password });
+      testUserId = response.body.user.id;
     });
 
     it('(-) API token (401)', async () => {
-      await request(app.getHttpServer())
-        .get('/projects')
-        .expect(401);
+      await request(app.getHttpServer()).get('/projects').expect(401);
     });
 
     it('(+) project w/token (201)', async () => {
@@ -95,14 +92,14 @@ describe('Eterna API (e2e)', () => {
         .set('Authorization', `Bearer ${jwtToken}`)
         .send({ name: 'E2E Project', description: 'this is test' })
         .expect(201);
-        
+
       expect(response.body).toHaveProperty('id');
       projectId = response.body.id;
     });
 
     it('(+) Conflict Detection', async () => {
       const now = Date.now();
-      
+
       await request(app.getHttpServer())
         .post('/tasks')
         .set('Authorization', `Bearer ${jwtToken}`)
@@ -112,7 +109,7 @@ describe('Eterna API (e2e)', () => {
           assigneeId: testUserId,
           scheduledStart: new Date(now + 1000000).toISOString(),
           scheduledEnd: new Date(now + 2000000).toISOString(),
-          priority: 'HIGH'
+          priority: 'HIGH',
         })
         .expect(201);
 
@@ -125,10 +122,9 @@ describe('Eterna API (e2e)', () => {
           assigneeId: testUserId,
           scheduledStart: new Date(now + 1500000).toISOString(),
           scheduledEnd: new Date(now + 2500000).toISOString(),
-          priority: 'HIGH'
+          priority: 'HIGH',
         })
         .expect(201);
-
 
       const conflictRes = await request(app.getHttpServer())
         .get('/schedule/conflicts')
@@ -137,7 +133,9 @@ describe('Eterna API (e2e)', () => {
 
       expect(Array.isArray(conflictRes.body)).toBe(true);
       expect(conflictRes.body.length).toBeGreaterThan(0);
-      expect(conflictRes.body[0].message).toContain('conflict schedule between "Meeting Penting 1" and "Meeting Penting 2"');
+      expect(conflictRes.body[0].message).toContain(
+        'conflict schedule between "Meeting Penting 1" and "Meeting Penting 2"',
+      );
     });
   });
 });

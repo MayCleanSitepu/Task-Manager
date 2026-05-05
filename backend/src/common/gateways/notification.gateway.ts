@@ -13,8 +13,9 @@ import { UseGuards } from '@nestjs/common';
     origin: '*',
   },
 })
-
-export class NotificationGateway implements OnGatewayConnection, OnGatewayDisconnect {
+export class NotificationGateway
+  implements OnGatewayConnection, OnGatewayDisconnect
+{
   @WebSocketServer() server: Server;
 
   handleConnection(client: Socket) {
@@ -24,7 +25,6 @@ export class NotificationGateway implements OnGatewayConnection, OnGatewayDiscon
   handleDisconnect(client: Socket) {
     console.log(`Client disconnected: ${client.id}`);
   }
-
 
   @SubscribeMessage('join')
   handleJoin(client: Socket, userId: string) {

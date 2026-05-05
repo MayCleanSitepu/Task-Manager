@@ -1,11 +1,18 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: 'ADMIN' | 'MEMBER';
+}
+
 interface AuthState {
   token: string | null;
-  user: any | null;
+  user: User | null;
   _hasHydrated: boolean;
-  setAuth: (token: string, user: any) => void;
+  setAuth: (token: string, user: User) => void;
   logout: () => void;
   setHasHydrated: (state: boolean) => void;
 }

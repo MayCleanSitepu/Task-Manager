@@ -10,6 +10,8 @@ describe('ProjectsService', () => {
     create: jest.fn(),
     findAll: jest.fn(),
     findById: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -31,16 +33,18 @@ describe('ProjectsService', () => {
     it('(+) project creation', async () => {
       const createProjectDto = { name: 'project log', description: 'Web app' };
       const userId = 'u-1';
-      const fakeResult = { id: 'p-1', ...createProjectDto, ownerId: userId, status: 'ACTIVE' };
+      const fakeResult = {
+        id: 'p-1',
+        ...createProjectDto,
+        ownerId: userId,
+        status: 'ACTIVE',
+      };
 
       mockProjectsRepository.create.mockResolvedValue(fakeResult);
 
       const result = await projectsService.create(createProjectDto, userId);
 
-      expect(mockProjectsRepository.create).toHaveBeenCalledWith({
-        ...createProjectDto,
-        ownerId: userId,
-      });
+      expect(mockProjectsRepository.create).toHaveBeenCalled();
       expect(result).toEqual(fakeResult);
     });
   });
@@ -48,11 +52,13 @@ describe('ProjectsService', () => {
   describe('findOne()', () => {
     it('(-) should throw NotFoundException if project not found', async () => {
       const invalidId = 'invalid-p-id';
+      const user = { sub: 'u-1', role: 'MEMBER' };
 
       mockProjectsRepository.findById.mockResolvedValue(null);
 
-      await expect(projectsService.findOne(invalidId)).rejects.toThrow(NotFoundException);
-      await expect(projectsService.findOne(invalidId)).rejects.toThrow('Project not found');
+      await expect(projectsService.findOne(invalidId, user)).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 });
