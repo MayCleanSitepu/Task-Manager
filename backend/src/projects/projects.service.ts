@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, Search } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
 import { ProjectsRepository } from './projects.repository';
@@ -9,7 +9,8 @@ export class ProjectsService {
 
   async create(createProjectDto: CreateProjectDto, userId: string) {
     return this.repository.create({
-      ...createProjectDto,
+      name: createProjectDto.name,
+      description: createProjectDto.description,
       ownerId: userId,
     });
   }

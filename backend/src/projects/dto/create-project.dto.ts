@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsOptional, IsString, MinLength } from 'class-validator';
+import { IsNotEmpty, IsString, MinLength } from 'class-validator';
 export class CreateProjectDto {
   @IsString()
   @IsNotEmpty({ message: 'Project name are required' })

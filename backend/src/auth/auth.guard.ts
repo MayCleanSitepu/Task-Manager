@@ -12,7 +12,11 @@ export class AuthGuard implements CanActivate {
   constructor(private jwtService: JwtService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context.switchToHttp().getRequest();
+    const request = context
+      .switchToHttp()
+      .getRequest<
+        Request & { user?: { sub: string; email: string; role: string } }
+      >();
     const token = this.extractTokenFromHeader(request);
 
     if (!token) {
@@ -20,10 +24,12 @@ export class AuthGuard implements CanActivate {
     }
 
     try {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const payload = await this.jwtService.verifyAsync(token, {
         secret: process.env.JWT_SECRET,
       });
-      request['user'] = payload;
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      request.user = payload;
     } catch {
       throw new UnauthorizedException();
     }

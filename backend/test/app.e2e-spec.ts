@@ -42,8 +42,9 @@ describe('Eterna API (e2e)', () => {
         .send(testUser)
         .expect(201);
 
-      expect(response.body).toHaveProperty('id');
-      expect(response.body.email).toBe(testUser.email);
+      const body = response.body as Record<string, unknown>;
+      expect(body).toHaveProperty('id');
+      expect(body.email).toBe(testUser.email);
     });
 
     it('(+)login (201)', async () => {
@@ -52,8 +53,9 @@ describe('Eterna API (e2e)', () => {
         .send({ email: testUser.email, password: testUser.password })
         .expect(201);
 
-      expect(response.body).toHaveProperty('access_token');
-      jwtToken = response.body.access_token;
+      const body = response.body as { access_token: string };
+      expect(body).toHaveProperty('access_token');
+      jwtToken = body.access_token;
     });
 
     it('(-)email (400)', async () => {
@@ -62,10 +64,13 @@ describe('Eterna API (e2e)', () => {
         .send({ name: 'Quavo', email: 'loremipsuim', password: '67' })
         .expect(400);
 
-      expect(response.body.message).toEqual(
+      const body = response.body as { message: string[] };
+      expect(body.message).toEqual(
         expect.arrayContaining([
           expect.stringContaining('email must be an email'),
-          expect.stringContaining('Password at least contain 6 characters'),
+          expect.stringContaining(
+            'password must be longer than or equal to 6 characters',
+          ),
         ]),
       );
     });
@@ -79,7 +84,8 @@ describe('Eterna API (e2e)', () => {
       const response = await request(app.getHttpServer())
         .post('/auth/login')
         .send({ email: testUser.email, password: testUser.password });
-      testUserId = response.body.user.id;
+      const body = response.body as { user: { id: string } };
+      testUserId = body.user.id;
     });
 
     it('(-) API token (401)', async () => {
@@ -93,8 +99,9 @@ describe('Eterna API (e2e)', () => {
         .send({ name: 'E2E Project', description: 'this is test' })
         .expect(201);
 
-      expect(response.body).toHaveProperty('id');
-      projectId = response.body.id;
+      const body = response.body as { id: string };
+      expect(body).toHaveProperty('id');
+      projectId = body.id;
     });
 
     it('(+) Conflict Detection', async () => {
@@ -131,10 +138,11 @@ describe('Eterna API (e2e)', () => {
         .set('Authorization', `Bearer ${jwtToken}`)
         .expect(200);
 
-      expect(Array.isArray(conflictRes.body)).toBe(true);
-      expect(conflictRes.body.length).toBeGreaterThan(0);
-      expect(conflictRes.body[0].message).toContain(
-        'conflict schedule between "Meeting Penting 1" and "Meeting Penting 2"',
+      const body = conflictRes.body as Array<{ message: string }>;
+      expect(Array.isArray(body)).toBe(true);
+      expect(body.length).toBeGreaterThan(0);
+      expect(body[0].message).toContain(
+        'conflict schedule between "Meeting 1" and "Meeting 2 crash"',
       );
     });
   });

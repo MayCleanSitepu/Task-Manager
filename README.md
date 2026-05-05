@@ -69,7 +69,7 @@ Given more time, I would implement:
 - **Activity Log**: A detailed audit trail for every change made to a project or task.
 - **Email Notifications**: Fallback for users who are offline during a task assignment.
 
-## ⏱️ Time Spent
+## Time Spent
 
 | Phase | Time |
 | :--- | :--- |

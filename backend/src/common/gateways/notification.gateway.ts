@@ -6,7 +6,6 @@ import {
   OnGatewayDisconnect,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { UseGuards } from '@nestjs/common';
 
 @WebSocketGateway({
   cors: {
@@ -27,16 +26,20 @@ export class NotificationGateway
   }
 
   @SubscribeMessage('join')
-  handleJoin(client: Socket, userId: string) {
-    client.join(`user_${userId}`);
+  async handleJoin(client: Socket, userId: string) {
+    await client.join(`user_${userId}`);
     console.log(`User ${userId} joined their notification room`);
   }
 
-  sendNotification(userId: string, event: string, data: any) {
+  sendNotification(
+    userId: string,
+    event: string,
+    data: Record<string, unknown>,
+  ) {
     this.server.to(`user_${userId}`).emit(event, data);
   }
 
-  broadcastNotification(event: string, data: any) {
+  broadcastNotification(event: string, data: Record<string, unknown>) {
     this.server.emit(event, data);
   }
 }

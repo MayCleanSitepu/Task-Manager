@@ -113,7 +113,8 @@ describe('AuthService (Unit Test)', () => {
 
       expect(mockJwtService.signAsync).toHaveBeenCalled();
       expect(result.access_token).toEqual('secretsauce');
-      expect(result.user.email).toEqual(loginDto.email);
+      const user = result.user as { email: string };
+      expect(user.email).toEqual(loginDto.email);
     });
 
     it('(-)login', async () => {

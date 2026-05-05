@@ -17,9 +17,9 @@ export class RolesGuard implements CanActivate {
       return true;
     }
 
-    const { user } = context.switchToHttp().getRequest();
-    // Admin can access everything regardless of required roles if we want,
-    // but better to follow required roles explicitly or add Admin check here.
+    const req = context.switchToHttp().getRequest<{ user?: { role: Role } }>();
+    const user = req.user;
+
     if (user?.role === Role.ADMIN) return true;
 
     return requiredRoles.some((role) => user?.role === role);

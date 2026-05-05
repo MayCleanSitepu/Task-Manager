@@ -1,11 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { Prisma } from 'src/generated/prisma/client';
 
 @Injectable()
 export class ProjectsRepository {
   constructor(private prisma: PrismaService) {}
 
-  async create(data: any) {
+  async create(data: Prisma.ProjectUncheckedCreateInput) {
     return this.prisma.project.create({ data });
   }
 
@@ -33,7 +34,7 @@ export class ProjectsRepository {
     });
   }
 
-  async update(id: string, data: any) {
+  async update(id: string, data: Prisma.ProjectUncheckedUpdateInput) {
     return this.prisma.project.update({
       where: { id },
       data,
