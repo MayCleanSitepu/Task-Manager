@@ -16,7 +16,7 @@ import { AuthGuard } from 'src/auth/auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { CurrentUser } from 'src/auth/current-user.decorator';
-import { Role } from '@prisma/client';
+import { Role } from 'src/generated/prisma/enums';
 
 type User = {
   sub: string;
